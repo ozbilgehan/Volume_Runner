@@ -1,0 +1,44 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Header -->
+    <div class="bg-card">
+        <div class="mx-auto flex w-full max-w-screen-xl flex-col px-6 sm:px-8">
+            <!-- Top spacing -->
+            <div class="my-4 flex min-w-0 flex-auto flex-col sm:my-4 sm:flex-row sm:items-center">
+                <div>
+                    <div class="text-3xl font-semibold leading-8 tracking-tight">
+                        VolRun
+                    </div>
+                    <div class="text-secondary font-medium tracking-tight">
+                        Monitor volume, check signals and performance
+                    </div>
+                </div>
+            </div>
+            <!-- Project selector -->
+            <div class="bg-default relative flex cursor-pointer self-start overflow-hidden rounded-t-xl border border-b-0 pb-1 pl-5 pr-4 pt-2"
+                matRipple [matMenuTriggerFor]="projectsMenu">
+                <div class="flex items-center">
+                    <div class="overflow-hidden">
+                        <div class="truncate font-medium leading-6">
+                            {{ selectedProject }}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center pl-2">
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_mini:chevron-down'"></mat-icon>
+                    </div>
+                </div>
+                <mat-menu #projectsMenu="matMenu" [xPosition]="'before'">
+                    <button mat-menu-item (click)="selectedProject = 'BTC'">
+                        BTC
+                    </button>
+                </mat-menu>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="-mt-px flex-auto border-t pt-4 sm:pt-6">
+        <div class="mx-auto w-full max-w-screen-xl">
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,235 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Header -->
+    <div class="bg-card">
+        <div class="mx-auto flex w-full max-w-screen-xl flex-col px-6 sm:px-8">
+            <!-- Top spacing -->
+            <div class="my-4 flex min-w-0 flex-auto flex-col sm:my-4 sm:flex-row sm:items-center">
+                <div>
+                    <div class="text-3xl font-semibold leading-8 tracking-tight">
+                        VolRun
+                    </div>
+                    <div class="text-secondary font-medium tracking-tight">
+                        Monitor Market Moves, Analyze Signals, Maximize Profits
+                    </div>
+                </div>
+                <!-- <div class="ml-auto flex items-center space-x-1 pl-2 sm:space-x-2">
+                    <languages></languages>
+                </div> -->
+            </div>
+        </div>
+    </div>
+    <!-- Main -->
+    <div class="-mt-px flex-auto border-t pt-4 sm:pt-6">
+        <div class="mx-auto w-full max-w-screen-xl">
+            <!-- Chart -->
+            <div
+                class="bg-card dark flex flex-auto flex-col overflow-hidden rounded-2xl shadow sm:col-span-2 lg:col-span-3">
+                <div class="ml-5 mr-6 mt-4 mb-4 flex items-center justify-between sm:mr-10">
+                    <div class="ml-2">
+                        <!-- Ticker selection -->
+                        <button class="bg-hover h-7 min-h-7 rounded-full px-4 mr-2" mat-button
+                            [matMenuTriggerFor]="tickerMenu">
+                            <span class="text-secondary text-l font-medium">{{selectedTicker.name}}</span>
+                        </button>
+                        <mat-menu #tickerMenu="matMenu" class="bg-card dark">
+                            <button *ngFor="let ticker of tickers" mat-menu-item (click)="onTickerChanged(ticker)">
+                                {{ticker.name}}
+                            </button>
+                        </mat-menu>
+                        <!-- Interval selection -->
+                        <button class="bg-hover h-7 min-h-7 rounded-full px-4" mat-button
+                            [matMenuTriggerFor]="intervalMenu">
+                            <span class="text-secondary text-l font-medium">{{selectedInterval}}</span>
+                        </button>
+                        <mat-menu #intervalMenu="matMenu" class="bg-card dark">
+                            <button *ngFor="let interval of intervals" mat-menu-item
+                                (click)="onIntervalChanged(interval)">
+                                {{interval}}
+                            </button>
+                        </mat-menu>
+                        <!-- Period selection -->
+                        <button class="bg-hover h-7 min-h-7 rounded-full px-4 ml-2" mat-button
+                            [matMenuTriggerFor]="periodMenu">
+                            <span class="text-secondary text-l font-medium">days: {{selectedPeriod}}</span>
+                        </button>
+                        <mat-menu #periodMenu="matMenu" class="bg-card dark">
+                            <button *ngFor="let period of [1, 2, 3, 4, 5, 6, 7, 14, 30]" mat-menu-item
+                                (click)="onPeriodChanged(period)">
+                                {{period}}
+                            </button>
+                        </mat-menu>
+                        <!-- Line count selection -->
+                        <button class="bg-hover h-7 min-h-7 rounded-full px-4 ml-2" mat-button
+                            [matMenuTriggerFor]="lineCountMenu">
+                            <span class="text-secondary text-l font-medium">lines: {{selectedLineCount}}</span>
+                        </button>
+                        <mat-menu #lineCountMenu="matMenu" class="bg-card dark">
+                            <button (click)="onLineCountChanged(0)" mat-menu-item>0</button>
+                            <button *ngFor="let signal of filteredSignalsByTraps(); let i = index" mat-menu-item
+                                (click)="onLineCountChanged(i+1)">
+                                {{i+1}}
+                            </button>
+                        </mat-menu>
+                        <!-- Signal selection -->
+                        <button class="bg-hover h-7 min-h-7 rounded-full cursor-pointer px-4 ml-2" mat-button>
+                            <mat-checkbox [(checked)]="isTrapOnlySignal"
+                                (change)="onTrapOnlySignalChange($event.checked)">Trap
+                                Seller/Buyer
+                            </mat-checkbox>
+                        </button>
+                    </div>
+                </div>
+                <!-- Signal marker -->
+                <div #toolTip id="toolTip" class=" overflow-hidden rounded-2xl p-4 pb-3 pr-3 shadow tooltip"
+                    *ngIf="markedSignal">
+                    <div class="flex items-center">
+                        <div class="flex flex-col">
+                            <div class="text-l font-semibold tracking-tight">
+                                <div class="truncate text-lg font-medium leading-6 tracking-tight">
+                                    {{selectedTicker.name}}
+                                </div>
+                                <div class="text-sm font-medium">
+                                    {{ markedSignal.volumeBar.price | currency: 'USD' }}
+                                </div>
+                            </div>
+                            <div class="text-secondary font-medium">
+                                <!-- 0/1 Print -->
+                                <div class="ml-1 flex items-center whitespace-nowrap"
+                                    *ngIf="markedSignal.strategy_1 != SignalResult.NONE">
+                                    0/1 Print
+                                    <mat-icon
+                                        [class]="'text-secondary icon-size-5 dark:text-' + getSignalIconColor(markedSignal.strategy_1) + '-400'"
+                                        [svgIcon]="'heroicons_outline:arrow-trending-' + getSignalIcon(markedSignal.strategy_1)"></mat-icon>
+                                </div>
+                                <!-- Trap Seller/Buyer -->
+                                <div class="ml-1 flex items-center whitespace-nowrap"
+                                    *ngIf="markedSignal.strategy_2 != SignalResult.NONE">
+                                    Trap Seller/Buyer
+                                    <mat-icon
+                                        [class]="'text-secondary icon-size-5 dark:text-' + getSignalIconColor(markedSignal.strategy_2) + '-400'"
+                                        [svgIcon]="'heroicons_outline:arrow-trending-' + getSignalIcon(markedSignal.strategy_2)"></mat-icon>
+                                </div>
+                                <!-- Large-Single -->
+                                <div class="ml-1 flex items-center whitespace-nowrap"
+                                    *ngIf="markedSignal.strategy_3 != SignalResult.NONE">
+                                    Large-Single
+                                    <mat-icon
+                                        [class]="'text-secondary icon-size-5 dark:text-' + getSignalIconColor(markedSignal.strategy_3) + '-400'"
+                                        [svgIcon]="'heroicons_outline:arrow-trending-' + getSignalIcon(markedSignal.strategy_3)"></mat-icon>
+                                </div>
+                                <!-- Double-Zero -->
+                                <div class="ml-1 flex items-center whitespace-nowrap"
+                                    *ngIf="markedSignal.strategy_4 != SignalResult.NONE">
+                                    Double-Zero
+                                    <mat-icon
+                                        [class]="'text-secondary icon-size-5 dark:text-' + getSignalIconColor(markedSignal.strategy_4) + '-400'"
+                                        [svgIcon]="'heroicons_outline:arrow-trending-' + getSignalIcon(markedSignal.strategy_4)"></mat-icon>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div #chartContainer id="chartContainer" class="flex h-100 flex-auto flex-col">
+                    <div #chart id="chart" class="h-full w-full flex-auto"></div>
+                </div>
+            </div>
+
+            <!-- Signal table-->
+            <div class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 my-6 shadow sm:col-span-6">
+                <div class="truncate text-lg font-medium leading-6 tracking-tight">
+                    Signal Details ({{ signals?.length ?? 0 }})
+                </div>
+                <div class="mt-2 flex flex-auto flex-col overflow-x-auto">
+                    <table class="min-w-240 overflow-y-visible" mat-table [dataSource]="signals">
+
+                        <!-- Volume bar direction -->
+                        <ng-container matColumnDef="barDirection" sticky>
+                            <th mat-header-cell *matHeaderCellDef>
+                                Direction
+                            </th>
+                            <td mat-cell *matCellDef="let signal">
+                                {{ signal.volumeBar.barDirection }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Volume bar price -->
+                        <ng-container matColumnDef="barPrice">
+                            <th mat-header-cell *matHeaderCellDef>
+                                Price
+                            </th>
+                            <td mat-cell *matCellDef="let signal">
+                                {{ signal.volumeBar.price | currency: 'USD' }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Volume bar datetime -->
+                        <ng-container matColumnDef="barDatetime">
+                            <th mat-header-cell *matHeaderCellDef>
+                                Date
+                            </th>
+                            <td mat-cell *matCellDef="let signal">
+                                {{ signal.volumeBar.priceDateTime }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Volume bar values -->
+                        <ng-container matColumnDef="barValues">
+                            <th mat-header-cell *matHeaderCellDef>
+                                Values [Sell/Buy]
+                            </th>
+                            <td mat-cell *matCellDef="let signal">
+                                [<span *ngFor="let val of signal.volumeBar.values">
+                                    [{{val[0]}},
+                                    {{val[1]}}]
+                                </span>]
+                            </td>
+                        </ng-container>
+
+                        <!-- 0/1 Print -->
+                        <ng-container matColumnDef="strategy_1">
+                            <th mat-header-cell *matHeaderCellDef>
+                                0/1 Print
+                            </th>
+                            <td mat-cell *matCellDef="let signal">
+                                {{signal.strategy_1}}
+                            </td>
+                        </ng-container>
+
+                        <!-- Trap Seller/Buyer -->
+                        <ng-container matColumnDef="strategy_2">
+                            <th mat-header-cell *matHeaderCellDef>
+                                Trap Seller/Buyer
+                            </th>
+                            <td mat-cell *matCellDef="let signal">
+                                {{signal.strategy_2}}
+                            </td>
+                        </ng-container>
+
+                        <!-- Large-Single -->
+                        <ng-container matColumnDef="strategy_3">
+                            <th mat-header-cell *matHeaderCellDef>
+                                Large-Single
+                            </th>
+                            <td mat-cell *matCellDef="let signal">
+                                {{signal.strategy_3}}
+                            </td>
+                        </ng-container>
+
+                        <!-- Double-Zero -->
+                        <ng-container matColumnDef="strategy_4">
+                            <th mat-header-cell *matHeaderCellDef>
+                                Double-Zero
+                            </th>
+                            <td mat-cell *matCellDef="let signal">
+                                {{signal.strategy_4}}
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="signalDetailColumns"></tr>
+                        <tr mat-row *matRowDef="let row;columns: signalDetailColumns"></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
